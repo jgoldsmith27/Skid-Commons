@@ -9,6 +9,36 @@ interface ChatsPageProps {
   onLogout: () => void;
 }
 
+function ChatList({ title, chats }: { title: string; chats: ChatSummary[] }): JSX.Element {
+  const toLabel = (chat: ChatSummary): string => chat.title ?? `Chat ${chat.id.slice(0, 8)}`;
+
+  return (
+    <section className="glass p-4 sm:p-5">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <span className="rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-xs font-medium text-slate-600">
+          {chats.length}
+        </span>
+      </div>
+      <ul className="grid gap-2.5">
+        {chats.map((chat) => (
+          <li key={chat.id}>
+            <Link to={`/chats/${chat.id}`} className="group chat-link">
+              <span className="font-medium text-slate-800">{toLabel(chat)}</span>
+              <span className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-sky-600">Open</span>
+            </Link>
+          </li>
+        ))}
+        {chats.length === 0 ? (
+          <li className="rounded-xl border border-dashed border-slate-300/90 px-3 py-5 text-center text-sm text-slate-500">
+            No chats yet.
+          </li>
+        ) : null}
+      </ul>
+    </section>
+  );
+}
+
 export function ChatsPage({ token, user, onLogout }: ChatsPageProps): JSX.Element {
   const [owned, setOwned] = useState<ChatSummary[]>([]);
   const [shared, setShared] = useState<ChatSummary[]>([]);
@@ -39,64 +69,42 @@ export function ChatsPage({ token, user, onLogout }: ChatsPageProps): JSX.Elemen
     }
   };
 
-  const toLabel = (chat: ChatSummary): string => chat.title ?? `Chat ${chat.id.slice(0, 8)}`;
-
   return (
-    <main className="mx-auto w-[min(96vw,62rem)] px-3 py-6 sm:py-8">
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-[clamp(1.45rem,2.4vw,2rem)] font-semibold tracking-tight">Skid Commons</h1>
-          <p className="text-sm text-slate-500">Signed in as {user.displayName}</p>
+    <main className="shell">
+      <section className="glass mb-4 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="label mb-2">Workspace</p>
+            <h1 className="text-[clamp(1.45rem,2.7vw,2.2rem)] font-semibold tracking-tight">Skid Commons</h1>
+            <p className="mt-1 text-sm text-slate-600">Signed in as {user.displayName}</p>
+          </div>
+          <button type="button" className="btn-soft" onClick={onLogout}>
+            Logout
+          </button>
         </div>
-        <button
-          type="button"
-          className="rounded-xl border border-line bg-mist px-4 py-2 text-sm font-semibold text-ink"
-          onClick={onLogout}
-        >
-          Logout
-        </button>
-      </header>
+      </section>
 
-      <section className="mb-4 rounded-2xl border border-line/90 bg-white/85 p-4 shadow-sm backdrop-blur-sm">
-        <h2 className="mb-3 text-base font-medium">Create chat</h2>
+      <section className="glass mb-4 p-4 sm:p-5">
+        <p className="label mb-2">New Chat</p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <input
-            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300/60"
+            className="field"
             placeholder="Optional chat title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
           />
-          <button type="button" onClick={createChat} className="rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white">
-            New chat
+          <button type="button" onClick={createChat} className="btn-primary whitespace-nowrap">
+            Create chat
           </button>
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded-2xl border border-line/90 bg-white/85 p-4 shadow-sm backdrop-blur-sm">
-          <h2 className="mb-3 text-base font-medium">Owned chats</h2>
-          <ul className="grid gap-2">
-            {owned.map((chat) => (
-              <li key={chat.id} className="rounded-xl border border-line bg-white px-3 py-2 text-sm">
-                <Link to={`/chats/${chat.id}`}>{toLabel(chat)}</Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="rounded-2xl border border-line/90 bg-white/85 p-4 shadow-sm backdrop-blur-sm">
-          <h2 className="mb-3 text-base font-medium">Shared with me</h2>
-          <ul className="grid gap-2">
-            {shared.map((chat) => (
-              <li key={chat.id} className="rounded-xl border border-line bg-white px-3 py-2 text-sm">
-                <Link to={`/chats/${chat.id}`}>{toLabel(chat)}</Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <ChatList title="Owned Chats" chats={owned} />
+        <ChatList title="Shared With Me" chats={shared} />
       </div>
 
-      {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm font-medium text-red-700">{error}</p> : null}
     </main>
   );
 }

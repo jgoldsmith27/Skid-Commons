@@ -42,52 +42,36 @@ export function AuthPage({ onAuthenticated }: AuthPageProps): JSX.Element {
   return (
     <AuthLayout>
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded-2xl border border-line/90 bg-white/85 p-5 shadow-sm backdrop-blur-sm">
-          <h2 className="mb-3 text-lg font-medium">Create account</h2>
-          <div className="grid gap-2.5">
+        <section className="glass p-5 sm:p-6">
+          <p className="label mb-2">Onboard</p>
+          <h2 className="mb-4 text-xl font-semibold tracking-tight">Create account</h2>
+          <div className="grid gap-3">
+            <input className="field" placeholder="accountId" value={accountId} onChange={(event) => setAccountId(event.target.value)} />
             <input
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300/60"
-              placeholder="accountId"
-              value={accountId}
-              onChange={(event) => setAccountId(event.target.value)}
-            />
-            <input
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300/60"
+              className="field"
               placeholder="displayName"
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
             />
-            <button
-              type="button"
-              onClick={handleRegister}
-              className="rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white"
-            >
-              Register
+            <button type="button" onClick={handleRegister} className="btn-primary">
+              Create account
             </button>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-line/90 bg-white/85 p-5 shadow-sm backdrop-blur-sm">
-          <h2 className="mb-3 text-lg font-medium">Login</h2>
-          <div className="grid gap-2.5">
-            <input
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300/60"
-              placeholder="accountId"
-              value={accountId}
-              onChange={(event) => setAccountId(event.target.value)}
-            />
-            <button
-              type="button"
-              onClick={handleLogin}
-              className="rounded-xl border border-line bg-mist px-4 py-2.5 text-sm font-semibold text-ink"
-            >
-              Login
+        <section className="glass p-5 sm:p-6">
+          <p className="label mb-2">Welcome Back</p>
+          <h2 className="mb-4 text-xl font-semibold tracking-tight">Login</h2>
+          <div className="grid gap-3">
+            <input className="field" placeholder="accountId" value={accountId} onChange={(event) => setAccountId(event.target.value)} />
+            <button type="button" onClick={handleLogin} className="btn-soft">
+              Continue
             </button>
           </div>
         </section>
       </div>
 
-      {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm font-medium text-red-700">{error}</p> : null}
     </AuthLayout>
   );
 }

@@ -9,6 +9,20 @@ interface ChatPageProps {
   user: UserView;
 }
 
+function MessageBubble({ message, me }: { message: MessageView; me: UserView }): JSX.Element {
+  const isAssistant = message.authorType === 'ASSISTANT';
+  const isMe = !isAssistant && message.authorUserId === me.id;
+
+  return (
+    <article className={`max-w-[88%] rounded-2xl border px-3 py-2.5 ${isMe ? 'ml-auto border-sky-200 bg-sky-50/85' : 'border-slate-200 bg-white/90'}`}>
+      <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        {isAssistant ? 'Skid Commons' : isMe ? `${message.authorDisplayName} (you)` : message.authorDisplayName}
+      </div>
+      <p className="text-[0.95rem] leading-relaxed text-slate-800">{message.content}</p>
+    </article>
+  );
+}
+
 export function ChatPage({ token, user }: ChatPageProps): JSX.Element {
   const { chatId = '' } = useParams();
   const [participants, setParticipants] = useState<UserView[]>([]);
@@ -21,7 +35,6 @@ export function ChatPage({ token, user }: ChatPageProps): JSX.Element {
     if (participants.length <= 1) {
       return `Chat ${chatId.slice(0, 8)}`;
     }
-
     return participants.map((participant) => participant.displayName).join(', ');
   }, [participants, chatId]);
 
@@ -113,67 +126,82 @@ export function ChatPage({ token, user }: ChatPageProps): JSX.Element {
   };
 
   return (
-    <main className="mx-auto grid w-[min(96vw,64rem)] gap-3 px-3 py-5 sm:py-8">
-      <Link className="w-fit text-sm text-slate-500 hover:text-slate-700" to="/chats">
-        ← Back to chats
-      </Link>
+    <main className="shell">
+      <header className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          className="rounded-lg border border-slate-200 bg-white/75 px-2.5 py-1.5 text-sm text-slate-700 transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200"
+          to="/chats"
+        >
+          Back to chats
+        </Link>
+        <span className="rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-600">
+          {participants.length} participant{participants.length === 1 ? '' : 's'}
+        </span>
+      </header>
 
-      <section className="rounded-2xl border border-line/90 bg-white/85 p-4 shadow-sm backdrop-blur-sm">
-        <h1 className="text-[clamp(1.2rem,2.1vw,1.7rem)] font-semibold tracking-tight">{title}</h1>
-        {participants.length > 1 ? (
-          <p className="mt-1 text-sm text-slate-500">
-            Participants: {participants.map((participant) => participant.displayName).join(', ')}
-          </p>
-        ) : null}
-      </section>
+      <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
+        <section className="glass flex min-h-[65vh] flex-col overflow-hidden">
+          <div className="border-b border-slate-200/90 px-4 py-4 sm:px-5">
+            <h1 className="text-[clamp(1.2rem,2.1vw,1.75rem)] font-semibold tracking-tight">{title}</h1>
+          </div>
 
-      <section className="rounded-2xl border border-line/90 bg-white/85 p-4 shadow-sm backdrop-blur-sm">
-        <h2 className="mb-2 text-base font-medium">Share chat</h2>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300/60"
-            placeholder="Target accountId"
-            value={shareAccountId}
-            onChange={(event) => setShareAccountId(event.target.value)}
-          />
-          <button
-            type="button"
-            onClick={handleShare}
-            className="rounded-xl border border-line bg-mist px-4 py-2.5 text-sm font-semibold text-ink"
-          >
-            Share
-          </button>
-        </div>
-      </section>
+          <div className="flex-1 space-y-2 overflow-y-auto px-3 py-3 sm:px-4">
+            {messages.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-300/90 px-3 py-8 text-center text-sm text-slate-500">
+                No messages yet. Start the conversation.
+              </div>
+            ) : null}
+            {messages.map((message) => (
+              <MessageBubble key={message.id} message={message} me={user} />
+            ))}
+          </div>
 
-      <section className="max-h-[60vh] min-h-[46vh] overflow-y-auto rounded-2xl border border-line bg-white/90 p-3 shadow-sm">
-        {messages.map((message) => (
-          <article key={message.id} className="border-b border-slate-100 py-2 last:border-0">
-            <div className="text-sm font-semibold">
-              {message.authorType === 'ASSISTANT'
-                ? 'Skid Commons'
-                : message.authorUserId === user.id
-                  ? `${message.authorDisplayName} (you)`
-                  : message.authorDisplayName}
+          <div className="border-t border-slate-200/90 px-3 py-3 sm:px-4">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                className="field"
+                placeholder="Type a message"
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+              />
+              <button type="button" onClick={handleSend} className="btn-primary whitespace-nowrap">
+                Send
+              </button>
             </div>
-            <div className="mt-0.5 text-[0.94rem] leading-relaxed text-slate-800">{message.content}</div>
-          </article>
-        ))}
-      </section>
+          </div>
+        </section>
 
-      <section className="flex flex-col gap-2 sm:flex-row">
-        <input
-          className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300/60"
-          placeholder="Type a message"
-          value={content}
-          onChange={(event) => setContent(event.target.value)}
-        />
-        <button type="button" onClick={handleSend} className="rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white">
-          Send
-        </button>
-      </section>
+        <aside className="grid gap-4">
+          <section className="glass p-4">
+            <p className="label mb-2">Participants</p>
+            <ul className="space-y-2">
+              {participants.map((participant) => (
+                <li key={participant.id} className="rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-sm text-slate-700">
+                  {participant.displayName}
+                  {participant.id === user.id ? ' (you)' : ''}
+                </li>
+              ))}
+            </ul>
+          </section>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+          <section className="glass p-4">
+            <p className="label mb-2">Share Chat</p>
+            <div className="grid gap-2.5">
+              <input
+                className="field"
+                placeholder="Target accountId"
+                value={shareAccountId}
+                onChange={(event) => setShareAccountId(event.target.value)}
+              />
+              <button type="button" onClick={handleShare} className="btn-soft">
+                Add participant
+              </button>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      {error ? <p className="mt-3 text-sm font-medium text-red-700">{error}</p> : null}
     </main>
   );
 }
