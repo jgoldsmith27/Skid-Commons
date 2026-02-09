@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ParticipantRole {
+  OWNER
+  MEMBER
+}
+
+enum AuthorType {
+  HUMAN
+  ASSISTANT
+  SYSTEM
+}
+
+model User {
+  id              String            @id @default(uuid())
+  accountId       String            @unique
+  displayName     String
+  createdAt       DateTime          @default(now())
+  chatsCreated    Chat[]
+  participations  ChatParticipant[]
+  authoredMessage Message[]
+}
+
+model Chat {
+  id              String            @id @default(uuid())
+  title           String?
+  createdAt       DateTime          @default(now())
+  createdByUserId String
+  createdBy       User              @relation(fields: [createdByUserId], references: [id])
+  participants    ChatParticipant[]
+  messages        Message[]
+}
+
+model ChatParticipant {
+  chatId     String
+  userId     String
+  role       ParticipantRole
+  createdAt  DateTime @default(now())
+  chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([chatId, userId])
+}
+
+model Message {
+  id           String     @id @default(uuid())
+  chatId        String
+  authorUserId  String?
+  authorType    AuthorType
+  content       String
+  createdAt     DateTime @default(now())
+  chat          Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  author        User?    @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+}

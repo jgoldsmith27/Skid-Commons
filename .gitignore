@@ -1,0 +1,13 @@
+node_modules
+dist
+**/dist
+.env
+.env.*
+apps/server/.env
+apps/server/.env.*
+apps/web/.env
+apps/web/.env.*
+apps/server/dev.db
+apps/server/dev.db-journal
+apps/server/src/infra/prisma/dev.db
+apps/server/src/infra/prisma/dev.db-journal

@@ -1,0 +1,21 @@
+{
+  "name": "skid-commons",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @skid/shared && npm run build -w @skid/server && npm run build -w @skid/web",
+    "dev:server": "npm run dev -w @skid/server",
+    "dev:web": "npm run dev -w @skid/web",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "db:generate": "npm run db:generate -w @skid/server",
+    "db:migrate": "npm run db:migrate -w @skid/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}
